@@ -1,14 +1,15 @@
-def reverse
-  array_list = [4, 2, 8, 5, 1]
-  reverse_array_list = []
-  length = array_list.size
+class Array
+  def custom_reverse
+    reverse_array_list = []
+    length = self.size
 
-  length.times do
-    swap_item = array_list.pop
-    reverse_array_list.append(swap_item)
+    length.times do
+      swap_item = self.pop
+      reverse_array_list.append(swap_item)
+    end
+
+    print reverse_array_list
   end
-
-  print reverse_array_list
 end
 
-reverse
+[4, 2, 8, 5, 1].custom_reverse
