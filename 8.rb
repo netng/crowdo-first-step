@@ -1,0 +1,68 @@
+Would any changes be necessary/preferable for the following controller code?
+
+```
+class ArticlesController < ApplicationController
+  def update
+    article = Article.find(params[:id])
+
+    article.update(form_params)
+
+    if article.genre == 'Pop'
+      article.publish_date = Date.today + 1.month
+      article.status = 'pending_review'
+    elsif article.genre == 'Animals'
+      article.publish_date = Date.today + 2.weeks
+      article.status = 'pending_approval'
+    end
+    article.save!
+
+    if article.status == 'pending_review'
+      writer = article.writer
+      if writer.articles.count > 10
+        writer.status = 'pending_upgrade_review'
+        writer.save!
+        SendWriterUpgradeMail.perform_now(writer)
+      end
+    end
+  end
+end
+```
+
+Jawaban: mungkin kode diatas masih bisa diimprove, misalnya:
+
+pada baris:
+
+`article = Article.find(params[:id])`
+
+bisa dijadikan sebagai `before_action`, dan juga method `find` bisa diubah menjadi `find_by_id`, karen jika menggunakan `find` jika id tidak ditemukan akan menyebabkan error `nil exception`. Sehingga kodenya menjadi:
+
+```
+private
+def set_article
+  article = Article.find_by_id(params[:id])
+end
+```
+
+dan juga kode-kode ini:
+
+```
+    if article.genre == 'Pop'
+      article.publish_date = Date.today + 1.month
+      article.status = 'pending_review'
+    elsif article.genre == 'Animals'
+      article.publish_date = Date.today + 2.weeks
+      article.status = 'pending_approval'
+    end
+    article.save!
+
+    if article.status == 'pending_review'
+      writer = article.writer
+      if writer.articles.count > 10
+        writer.status = 'pending_upgrade_review'
+        writer.save!
+        SendWriterUpgradeMail.perform_now(writer)
+      end
+    end
+```
+
+terlihat masih bisa dipisahkan, karena kode tersebut melakukan tugas yang berbeda, pertama untuk review/approval status artikel, yang berikutnya bertugas menginformasikan upgrade status ke penulis artikel. Mungkin bisa dipisahkan dalam bentuk service object.
