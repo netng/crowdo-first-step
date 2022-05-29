@@ -1,5 +1,3 @@
-require 'rspec'
-
 class Array
   def custom_uniq
     uniq_array = []
